@@ -145,35 +145,37 @@ currency_to_rub = {
 
 
 
-folder = input('Введите название папки с файлами: ')
 
-salary_dynamic = {}
-count_dynamic = {}
-salary_prof_dynamic = {}
-prof_count = {}
-path = Path(folder)
-years_count = len(list(path.iterdir()))
-prof = input('Введите название профессии: ')
-years = []
-for i in range(0, years_count):
-    years.append([folder,f"{2007 + i}", prof])
 if __name__ == '__main__':
+    folder = input('Введите название папки с файлами: ')
+
+    salary_dynamic = {}
+    count_dynamic = {}
+    salary_prof_dynamic = {}
+    prof_count = {}
+    path = Path(folder)
+    years_count = len(list(path.iterdir()))
+    prof = input('Введите название профессии: ')
+    years = []
+    for i in range(0, years_count):
+        years.append([folder, f"{2007 + i}", prof])
     with Pool(years_count) as p:
         x = p.map(read_csv_year, years)
+    for i in range(0, years_count):
+        year = int(years[i][1])
+        salary_dynamic[year] = x[i][0][year]
+        count_dynamic[year] = x[i][1][year]
+        salary_prof_dynamic[year] = x[i][2][year]
+        prof_count[year] = x[i][3][year]
+    print('Динамика уровня зарплат по годам:', salary_dynamic)
+    print('Динамика количества вакансий по годам:', count_dynamic)
+    print('Динамика уровня зарплат по годам для выбранной профессии:', salary_prof_dynamic)
+    print('Динамика количества вакансий по годам для выбранной профессии:', prof_count)
+
+    report = Report()
+    report.generate_excel([salary_dynamic, salary_prof_dynamic, count_dynamic, prof_count])
 
 # x = read_csv_year(prof, f"{year}", name)
-for i in range(0, years_count):
-    year = int(years[i][1])
-    salary_dynamic[year] = x[i][0][year]
-    count_dynamic[year] = x[i][1][year]
-    salary_prof_dynamic[year] = x[i][2][year]
-    prof_count[year] = x[i][3][year]
 
 
-print('Динамика уровня зарплат по годам:', salary_dynamic)
-print('Динамика количества вакансий по годам:', count_dynamic)
-print('Динамика уровня зарплат по годам для выбранной профессии:', salary_prof_dynamic)
-print('Динамика количества вакансий по годам для выбранной профессии:', prof_count)
 
-report = Report()
-report.generate_excel([salary_dynamic, salary_prof_dynamic, count_dynamic, prof_count])
