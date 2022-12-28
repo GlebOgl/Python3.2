@@ -9,6 +9,7 @@ import doctest
 import time
 from multiprocessing import Pool, Queue, Process
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Report:
@@ -92,7 +93,7 @@ def csv_filer(reader):
     return vac
 
 
-def read_csv_year(args, q):
+def read_csv_year(args):
     folder = args[0]
     name = args[1]
     prof = args[2]
@@ -128,7 +129,7 @@ def read_csv_year(args, q):
         salary_dynamic[key] = sum(salary_dynamic[key]) // len(salary_dynamic[key])
     for key in salary_prof_dynamic:
         salary_prof_dynamic[key] = sum(salary_prof_dynamic[key]) // max(len(salary_prof_dynamic[key]), 1)
-    q.put([salary_dynamic, count_dynamic, salary_prof_dynamic, prof_count])
+    return ([salary_dynamic, count_dynamic, salary_prof_dynamic, prof_count])
 
 
 currency_to_rub = {
@@ -160,17 +161,12 @@ if __name__ == '__main__':
     years = []
     for i in range(0, years_count):
         years.append([folder, f"{2007 + i}", prof])
-    q = Queue()
-    x = []
-    for year in years:
-        p = Process(target=read_csv_year, args=(year, q))
-        x.append(p)
-        p.start()
 
-    for i in range(0, years_count):
-        p = x[i]
-        p.join()
-        data = q.get()
+    with ThreadPoolExecutor() as Executor:
+        x = Executor.map(read_csv_year, years)
+    results = list(x)
+
+    for data in results:
         year = list(data[0].keys())[0]
         salary_dynamic[year] = data[0][year]
         count_dynamic[year] = data[1][year]
