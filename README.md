@@ -11,3 +11,6 @@
 - С многопроцессорной обработкой (main.py)
 - ![image](https://user-images.githubusercontent.com/79518116/209811906-01468568-67e9-47c3-aab9-133714b0957f.png)
 
+### 3.2.3
+- с Concurrent futures (время увеличилось)
+-![image](https://user-images.githubusercontent.com/79518116/209818323-be7aff7d-6ee3-4b27-95a1-9aed94c03993.png)
