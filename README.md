@@ -7,6 +7,6 @@
 ![image](https://user-images.githubusercontent.com/79518116/209677546-35a45c9c-c70f-4aa9-a72c-56ad5579f4ab.png)
 ### 3.2.2
 - Без многопроцессорной обработки
-- ![image](https://user-images.githubusercontent.com/79518116/209682803-d76e0215-8724-4d22-8197-ae60214a364e.png)
+- ![image](https://user-images.githubusercontent.com/79518116/209809480-5ecc22f7-7c24-4fa0-8437-186499f87831.png)
 - С многопроцессорной обработкой
 - 
