@@ -6,7 +6,8 @@ from openpyxl.styles import Border, Side, Font
 import matplotlib.pyplot as plt
 import numpy as np
 import doctest
-from multiprocessing import Pool
+import time
+from multiprocessing import Pool, Queue, Process
 from pathlib import Path
 
 
@@ -74,7 +75,7 @@ def csv_reader(name):
     Returns:
         list, list: списсок заголовков файла, список строк файла
     """
-    csv_list = csv.reader(open(name))
+    csv_list = csv.reader(open(name, encoding='utf-8-sig'))
     data = [x for x in csv_list]
     return data[0], data[1::]
 
@@ -91,7 +92,7 @@ def csv_filer(reader):
     return vac
 
 
-def read_csv_year(args):
+def read_csv_year(args, q):
     folder = args[0]
     name = args[1]
     prof = args[2]
@@ -127,7 +128,7 @@ def read_csv_year(args):
         salary_dynamic[key] = sum(salary_dynamic[key]) // len(salary_dynamic[key])
     for key in salary_prof_dynamic:
         salary_prof_dynamic[key] = sum(salary_prof_dynamic[key]) // max(len(salary_prof_dynamic[key]), 1)
-    return [salary_dynamic, count_dynamic, salary_prof_dynamic, prof_count]
+    q.put([salary_dynamic, count_dynamic, salary_prof_dynamic, prof_count])
 
 
 currency_to_rub = {
@@ -148,25 +149,33 @@ currency_to_rub = {
 
 if __name__ == '__main__':
     folder = input('Введите название папки с файлами: ')
-
+    prof = input('Введите название профессии: ')
     salary_dynamic = {}
     count_dynamic = {}
     salary_prof_dynamic = {}
     prof_count = {}
     path = Path(folder)
     years_count = len(list(path.iterdir()))
-    prof = input('Введите название профессии: ')
+    start_time = time.time()
     years = []
     for i in range(0, years_count):
         years.append([folder, f"{2007 + i}", prof])
-    with Pool(years_count) as p:
-        x = p.map(read_csv_year, years)
+    q = Queue()
+    x = []
+    for year in years:
+        p = Process(target=read_csv_year, args=(year, q))
+        x.append(p)
+        p.start()
+
     for i in range(0, years_count):
-        year = int(years[i][1])
-        salary_dynamic[year] = x[i][0][year]
-        count_dynamic[year] = x[i][1][year]
-        salary_prof_dynamic[year] = x[i][2][year]
-        prof_count[year] = x[i][3][year]
+        p = x[i]
+        p.join()
+        data = q.get()
+        year = list(data[0].keys())[0]
+        salary_dynamic[year] = data[0][year]
+        count_dynamic[year] = data[1][year]
+        salary_prof_dynamic[year] = data[2][year]
+        prof_count[year] = data[3][year]
     print('Динамика уровня зарплат по годам:', salary_dynamic)
     print('Динамика количества вакансий по годам:', count_dynamic)
     print('Динамика уровня зарплат по годам для выбранной профессии:', salary_prof_dynamic)
@@ -174,8 +183,8 @@ if __name__ == '__main__':
 
     report = Report()
     report.generate_excel([salary_dynamic, salary_prof_dynamic, count_dynamic, prof_count])
+    print("Время работы: %s seconds" % round(time.time() - start_time, 4))
 
-# x = read_csv_year(prof, f"{year}", name)
 
 
 

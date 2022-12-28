@@ -5,6 +5,7 @@ import openpyxl
 from openpyxl.styles import Border, Side, Font
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 import doctest
 
 
@@ -229,6 +230,7 @@ currency_to_rub = {
 output_type = input("Какой вывод требуется(Вакансии/Статистика: ")
 name = input('Введите название файла: ')
 prof = input('Введите название профессии: ')
+start_time = time.time()
 header, vac = csv_reader(name)
 vac = csv_filer(vac)
 dict_naming = {}
@@ -305,3 +307,5 @@ else:
     set_graf4(most)
     plt.tight_layout()
     plt.savefig("graph.png")
+
+print("Время работы: %s seconds" % round(time.time() - start_time, 4))
